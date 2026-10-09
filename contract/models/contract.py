@@ -21,12 +21,12 @@ class ContractContract(models.Model):
     _name = "contract.contract"
     _description = "Contract"
     _order = "code, name asc"
-    _inherit = [
+    _inherit = (
         "contract.template",
         "portal.mixin",
         "mail.thread",
         "mail.activity.mixin",
-    ]
+    )
 
     # === Basic Information ===
     active = fields.Boolean(default=True)
@@ -39,7 +39,6 @@ class ContractContract(models.Model):
         default=lambda self: self.env.user,
     )
     group_id = fields.Many2one(
-        string="Group",
         comodel_name="account.analytic.account",
         compute="_compute_group_id",
         store=True,
@@ -75,7 +74,6 @@ class ContractContract(models.Model):
         compute="_compute_currency_id",
         inverse="_inverse_currency_id",
         comodel_name="res.currency",
-        string="Currency",
     )
     manual_currency_id = fields.Many2one(
         comodel_name="res.currency",
@@ -88,7 +86,6 @@ class ContractContract(models.Model):
     )
     fiscal_position_id = fields.Many2one(
         comodel_name="account.fiscal.position",
-        string="Fiscal Position",
         ondelete="restrict",
     )
     invoice_count = fields.Integer(compute="_compute_invoice_count")
@@ -98,7 +95,6 @@ class ContractContract(models.Model):
 
     # === Contract Template and Lines ===
     contract_template_id = fields.Many2one(
-        string="Contract Template",
         comodel_name="contract.template",
     )
     contract_line_ids = fields.One2many(
@@ -237,7 +233,7 @@ class ContractContract(models.Model):
                 if line.analytic_distribution:
                     all_analytic_accounts.extend(
                         int(acc_id)
-                        for account_ids in line.analytic_distribution.keys()
+                        for account_ids in line.analytic_distribution
                         for acc_id in account_ids.split(",")
                     )
             if len(set(all_analytic_accounts)) == 1:
@@ -339,7 +335,15 @@ class ContractContract(models.Model):
             "name": "Invoices",
             "res_model": "account.move",
             "view_mode": "list,kanban,form,calendar,pivot,graph,activity",
-            "views": [(False, "list"), (False, "kanban"), (False, "form"), (False, "calendar"), (False, "pivot"), (False, "graph"), (False, "activity")],  # requis par Odoo 20
+            "views": [
+                (False, "list"),
+                (False, "kanban"),
+                (False, "form"),
+                (False, "calendar"),
+                (False, "pivot"),
+                (False, "graph"),
+                (False, "activity"),
+            ],  # requis par Odoo 20
             "domain": [("id", "in", self._get_related_invoices().ids)],
             "context": ctx,
         }
@@ -351,13 +355,13 @@ class ContractContract(models.Model):
         self.ensure_one()
         template = self.env.ref("contract.email_contract_template", False)
         compose_form = self.env.ref("mail.email_compose_message_wizard_form")
-        ctx = dict(
-            default_model="contract.contract",
-            default_res_ids=self.ids,
-            default_use_template=bool(template),
-            default_template_id=template and template.id or False,
-            default_composition_mode="comment",
-        )
+        ctx = {
+            "default_model": "contract.contract",
+            "default_res_ids": self.ids,
+            "default_use_template": bool(template),
+            "default_template_id": template and template.id or False,
+            "default_composition_mode": "comment",
+        }
         return {
             "name": self.env._("Compose Email"),
             "type": "ir.actions.act_window",
@@ -575,15 +579,16 @@ class ContractContract(models.Model):
                     current_note = False
                 elif line.note_invoicing_mode == "with_next_line":
                     current_note = line
-            elif line.is_recurring_note or not line.display_type:
-                if line._can_be_invoiced(date_ref):
-                    if current_section:
-                        lines2invoice |= current_section
-                        current_section = False
-                    if current_note:
-                        lines2invoice |= current_note
-                    lines2invoice |= line
-                    current_note = False
+            elif (
+                line.is_recurring_note or not line.display_type
+            ) and line._can_be_invoiced(date_ref):
+                if current_section:
+                    lines2invoice |= current_section
+                    current_section = False
+                if current_note:
+                    lines2invoice |= current_note
+                lines2invoice |= line
+                current_note = False
             previous = line
         return lines2invoice.sorted()
 
@@ -690,10 +695,12 @@ class ContractContract(models.Model):
         # Invoice by companies, so assignation emails get correct context
         for company in companies:
             contracts_to_invoice = contracts.filtered(
-                lambda contract, comp=company: contract.company_id == comp
-                and (
-                    not contract.date_end
-                    or contract.recurring_next_date <= contract.date_end
+                lambda contract, comp=company: (
+                    contract.company_id == comp
+                    and (
+                        not contract.date_end
+                        or contract.recurring_next_date <= contract.date_end
+                    )
                 )
             ).with_company(company)
             _recurring_create_func(contracts_to_invoice, date_ref)

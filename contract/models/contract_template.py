@@ -16,25 +16,22 @@ class ContractTemplate(models.Model):
     _check_company_auto = True
 
     # Fields not synced to the actual contract
-    NO_SYNC = ["name", "partner_id", "company_id"]
+    NO_SYNC = ("name", "partner_id", "company_id")
 
     # === Basic Info ===
 
     name = fields.Char(required=True)
     partner_id = fields.Many2one(
         comodel_name="res.partner",
-        string="Partner",
         index=True,
     )
     company_id = fields.Many2one(
         comodel_name="res.company",
-        string="Company",
         required=True,
         default=lambda self: self.env.company,
     )
     pricelist_id = fields.Many2one(
         comodel_name="product.pricelist",
-        string="Pricelist",
     )
 
     # === Contract Settings ===
@@ -56,7 +53,6 @@ class ContractTemplate(models.Model):
     )
     journal_id = fields.Many2one(
         comodel_name="account.journal",
-        string="Journal",
         domain="[('type', '=', contract_type)]",
         compute="_compute_journal_id",
         store=True,

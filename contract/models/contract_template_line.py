@@ -22,7 +22,6 @@ class ContractTemplateLine(models.Model):
     )
     contract_id = fields.Many2one(
         comodel_name="contract.template",
-        string="Contract",
         required=True,
         ondelete="cascade",
     )
@@ -35,7 +34,6 @@ class ContractTemplateLine(models.Model):
     # === Product & UOM ===
     product_id = fields.Many2one(
         "product.product",
-        string="Product",
         domain=[("active", "=", True)],
     )
     name = fields.Text(
@@ -175,8 +173,9 @@ class ContractTemplateLine(models.Model):
     def _compute_automatic_price(self):
         """Reset automatic price if contract is switched to 'purchase'."""
         self.filtered(
-            lambda line: line.contract_id.contract_type == "purchase"
-            and line.automatic_price
+            lambda line: (
+                line.contract_id.contract_type == "purchase" and line.automatic_price
+            )
         ).automatic_price = False
 
     @api.depends("display_type", "note_invoicing_mode")

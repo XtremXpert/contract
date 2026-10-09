@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- Copyright 2020 Tecnativa - Víctor Martínez
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt32" id="product_information">
+                <div id="product_information" class="row mt32">
                     <div class="col-12 col-md-6 mb-4 mb-md-0">
                         <div t-if="contract.code" class="row mb-2 mb-sm-1">
                             <div class="col-12 col-sm-4">
@@ -181,7 +181,7 @@
                     </div>
                 </div>
                 <div id="item_details">
-                    <table class="table table-sm" id="sales_order_table">
+                    <table id="sales_order_table" class="table table-sm">
                         <thead class="bg-100">
                             <tr>
                                 <th name="th_name" class="text-left">Description</th>
