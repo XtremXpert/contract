@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Odoo 20 : carte du portail en enregistrement portal.entry -->
+<odoo noupdate="1">
+    <record id="portal_entry_contract" model="portal.entry">
+        <field name="name">Contracts</field>
+        <field name="description">Follow your contracts</field>
+        <field name="url">/my/contracts</field>
+        <field name="image" type="bytes" file="contract/static/src/img/contract_icon.svg" />
+        <field name="placeholder_count">contract_count</field>
+        <field name="category">common_category</field>
+        <field name="sequence" eval="50" />
+    </record>
+</odoo>
